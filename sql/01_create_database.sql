@@ -1,0 +1,3 @@
+CREATE DATABASE ngn_dre;
+USE ngn_dre;
+SELECT DATABASE();

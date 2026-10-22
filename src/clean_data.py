@@ -42,6 +42,12 @@ def clean(df):
         #change True/False into 1/0
     df["main_road_access"] = df["main_road_access"].astype(int)
 
+
+
+        #change True/False into 1/0 (night light)
+    df["has_nightlight"] = df["has_nightlight"].astype(int)
+
+
         #split the text "11;0;3;0" into 4 number columns (25 km)
     parts = df["fatalities_within_25km"].str.split(";", expand=True).astype(int)
 
@@ -134,7 +140,7 @@ def main():
     df.to_csv(OUT_DIR / "settlements_clean.csv", index=False)
     print("Saved:", df.shape)
     print(df[["opportunity_score", "opportunity_score_adj"]].describe())
+    print(df["has_nightlight"].value_counts())
 
-    
 if __name__ == "__main__":
     main()
