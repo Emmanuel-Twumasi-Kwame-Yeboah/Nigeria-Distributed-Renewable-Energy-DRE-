@@ -1,0 +1,29 @@
+{
+  "name": "NGN DR Energy",
+  "dataColors": ["#FFB703", "#2EC4B6", "#FF6B6B", "#4EA8DE", "#9B5DE5", "#8FA3BF", "#06D6A0", "#F15BB5"],
+  "background": "#131C2E",
+  "foreground": "#F5F7FA",
+  "tableAccent": "#FFB703",
+  "good": "#2EC4B6",
+  "neutral": "#FFB703",
+  "bad": "#FF6B6B",
+  "textClasses": {
+    "title": { "fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#F5F7FA" },
+    "label": { "fontFace": "Segoe UI", "fontSize": 10, "color": "#8FA3BF" },
+    "callout": { "fontFace": "Segoe UI Semibold", "fontSize": 28, "color": "#FFB703" }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#131C2E" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#22304D" } }, "radius": 8 }],
+        "title": [{ "show": true, "fontColor": { "solid": { "color": "#F5F7FA" } }, "fontSize": 12 }]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#0B1220" } }, "transparency": 0 }]
+      }
+    }
+  }
+}
