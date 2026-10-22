@@ -71,6 +71,26 @@ def clean(df):
     df = pd.concat([df, parts], axis=1)
     df["fatal50_total"] = parts.sum(axis=1)
     df = df.drop(columns=["fatalities_within_50km"])
+
+        #power status (from how much of the place is lit at night)
+    df["power_status"] = "No power"
+    df.loc[df["overlap_percentage"] > 0, "power_status"] = "Some power"
+    df.loc[df["overlap_percentage"] >= 50, "power_status"] = "Has power"
+
+        #place type (from population)
+    df["place_type"] = "Village"
+    df.loc[df["population"] >= 1000, "place_type"] = "Small town"
+    df.loc[df["population"] >= 5000, "place_type"] = "Town"
+    df.loc[df["population"] >= 20000, "place_type"] = "City"
+
+        #grid band (distance to the nearest power line)
+    df["grid_band"] = "Under 5 km"
+    df.loc[df["dist_transmission_km"] > 5, "grid_band"] = "5-10 km"
+    df.loc[df["dist_transmission_km"] > 10, "grid_band"] = "Over 10 km"
+
+        #target places (rural AND no power)
+    df["is_rural"] = (df["population"] < 5000).astype(int)
+    df["is_target"] = ((df["is_rural"] == 1) & (df["power_status"] == "No power")).astype(int)
     return df
 
 
@@ -78,10 +98,28 @@ def clean(df):
 def main():
     df = clean(load())
     print(df.shape)
+
     print(df.loc[0, ["fatal25_p1", "fatal25_p2", "fatal25_p3", "fatal25_p4", "fatal25_total"]])
+
     print(df["rwi_missing"].sum(), df["hub_missing"].sum())
+
     print(df["pv_value"].isna().sum())
+
     print(df["main_road_access"].value_counts())
+
     print(df.loc[0, ["fatal50_p1", "fatal50_p2", "fatal50_p3", "fatal50_p4", "fatal50_total"]])
+
+    print(df["power_status"].value_counts())
+
+    print(df["place_type"].value_counts())
+
+    print(df["grid_band"].value_counts())
+
+    print(df["is_rural"].value_counts())
+
+    print(df["is_target"].value_counts())
+    print(df[df["is_target"] == 1]["place_type"].value_counts())
+
+
 if __name__ == "__main__":
     main()
