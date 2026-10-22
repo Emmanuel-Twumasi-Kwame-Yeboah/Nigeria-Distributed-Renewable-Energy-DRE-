@@ -30,6 +30,10 @@ def clean(df):
 
     #drop columns that copy other columns
     df = df.drop(columns=["num_connections", "has_education_facility", "has_health_facility"])
+        
+        #mark which values were empty (1 = empty, 0 = filled)
+    df["rwi_missing"] = df["mean_rwi"].isna().astype(int)
+    df["hub_missing"] = df["nearest_hub_name"].isna().astype(int)
     return df
 
 
@@ -38,7 +42,7 @@ def main():
     df = clean(load())
     print(df.shape)
     print(df.columns.tolist())
-
+    print(df["rwi_missing"].sum(), df["hub_missing"].sum())
 
 if __name__ == "__main__":
     main()
