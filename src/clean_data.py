@@ -34,6 +34,43 @@ def clean(df):
         #mark which values were empty (1 = empty, 0 = filled)
     df["rwi_missing"] = df["mean_rwi"].isna().astype(int)
     df["hub_missing"] = df["nearest_hub_name"].isna().astype(int)
+
+        #fill the one empty solar value with the middle value of its LGA
+    lga_middle = df.groupby(["state", "lga"])["pv_value"].transform("median")
+    df["pv_value"] = df["pv_value"].fillna(lga_middle)
+
+        #change True/False into 1/0
+    df["main_road_access"] = df["main_road_access"].astype(int)
+
+        #split the text "11;0;3;0" into 4 number columns (25 km)
+    parts = df["fatalities_within_25km"].str.split(";", expand=True).astype(int)
+
+
+
+
+    parts.columns = ["fatal25_p1", "fatal25_p2", "fatal25_p3", "fatal25_p4"]
+
+
+
+
+    df = pd.concat([df, parts], axis=1)
+
+
+
+
+    df["fatal25_total"] = parts.sum(axis=1)
+
+
+
+    
+    df = df.drop(columns=["fatalities_within_25km"])
+
+        #split the text into 4 number columns (50 km)
+    parts = df["fatalities_within_50km"].str.split(";", expand=True).astype(int)
+    parts.columns = ["fatal50_p1", "fatal50_p2", "fatal50_p3", "fatal50_p4"]
+    df = pd.concat([df, parts], axis=1)
+    df["fatal50_total"] = parts.sum(axis=1)
+    df = df.drop(columns=["fatalities_within_50km"])
     return df
 
 
@@ -41,8 +78,10 @@ def clean(df):
 def main():
     df = clean(load())
     print(df.shape)
-    print(df.columns.tolist())
+    print(df.loc[0, ["fatal25_p1", "fatal25_p2", "fatal25_p3", "fatal25_p4", "fatal25_total"]])
     print(df["rwi_missing"].sum(), df["hub_missing"].sum())
-
+    print(df["pv_value"].isna().sum())
+    print(df["main_road_access"].value_counts())
+    print(df.loc[0, ["fatal50_p1", "fatal50_p2", "fatal50_p3", "fatal50_p4", "fatal50_total"]])
 if __name__ == "__main__":
     main()
