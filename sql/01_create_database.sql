@@ -60,3 +60,35 @@ CREATE TABLE settlements (
 );
 
 DESCRIBE settlements;
+
+-- ========== QUESTION 1 - HOW BIG IS THE ACCESS GAP? ==========
+
+-- 1a: places, people and demand by power status
+SELECT power_status,
+       COUNT(*) AS places,
+       SUM(population) AS people,
+       ROUND(100 * SUM(population) / (SELECT SUM(population) FROM settlements), 1) AS pct_people,
+       ROUND(SUM(demand)) AS demand
+FROM settlements
+GROUP BY power_status;
+
+-- 1b: top 10 states by people living with no power
+SELECT state,
+       COUNT(*) AS places_no_power,
+       SUM(population) AS people_no_power,
+       ROUND(100 * SUM(population) / (SELECT SUM(population) FROM settlements WHERE power_status = 'No power'), 1) AS pct_of_gap
+FROM settlements
+WHERE power_status = 'No power'
+GROUP BY state
+ORDER BY people_no_power DESC
+LIMIT 10;
+
+-- 1c: people with no power, by place type
+SELECT place_type,
+       COUNT(*) AS places_no_power,
+       SUM(population) AS people_no_power,
+       ROUND(100 * SUM(population) / (SELECT SUM(population) FROM settlements WHERE power_status = 'No power'), 1) AS pct_of_gap
+FROM settlements
+WHERE power_status = 'No power'
+GROUP BY place_type
+ORDER BY people_no_power DESC;
