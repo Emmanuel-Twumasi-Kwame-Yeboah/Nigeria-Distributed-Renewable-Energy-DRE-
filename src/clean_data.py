@@ -18,7 +18,7 @@ def load():
 
 # ---------- CLEAN ----------
 def clean(df):
-    # STEP 1: rename columns
+    # rename columns
     df = df.rename(columns={
         "admin_cgaz_1": "state",
         "admin_cgaz_2": "lga",
@@ -28,6 +28,8 @@ def clean(df):
         "demand_connection": "demand_per_connection",
     })
 
+    #drop columns that copy other columns
+    df = df.drop(columns=["num_connections", "has_education_facility", "has_health_facility"])
     return df
 
 
