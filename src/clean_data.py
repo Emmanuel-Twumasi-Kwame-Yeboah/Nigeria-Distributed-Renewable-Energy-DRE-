@@ -120,6 +120,10 @@ def main():
     print(df["is_target"].value_counts())
     print(df[df["is_target"] == 1]["place_type"].value_counts())
 
-
+def main():
+    df = clean(load())
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    df.to_csv(OUT_DIR / "settlements_clean.csv", index=False)
+    print("Saved:", df.shape)
 if __name__ == "__main__":
     main()
