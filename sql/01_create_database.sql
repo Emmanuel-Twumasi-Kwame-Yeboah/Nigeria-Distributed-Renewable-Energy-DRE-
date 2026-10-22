@@ -61,7 +61,7 @@ CREATE TABLE settlements (
 
 DESCRIBE settlements;
 
--- ========== QUESTION 1 - HOW BIG IS THE ACCESS GAP? ==========
+-- QUESTION 1 - HOW BIG IS THE ACCESS GAP?
 
 -- 1a: places, people and demand by power status
 SELECT power_status,
@@ -92,3 +92,33 @@ FROM settlements
 WHERE power_status = 'No power'
 GROUP BY place_type
 ORDER BY people_no_power DESC;
+
+-- QUESTION 2 - WHICH STATES AND LGAS OFFER THE BEST OPPORTUNITY?
+
+-- 2a: top 10 states by unserved demand (target places only)
+SELECT state,
+       COUNT(*) AS target_places,
+       SUM(population) AS people,
+       ROUND(SUM(demand)) AS unserved_demand,
+       ROUND(100 * SUM(demand) / (SELECT SUM(demand) FROM settlements WHERE is_target = 1), 1) AS pct_of_demand,
+       ROUND(AVG(opportunity_score), 1) AS avg_score,
+       ROUND(AVG(opportunity_score_adj), 1) AS avg_score_adj
+FROM settlements
+WHERE is_target = 1
+GROUP BY state
+ORDER BY unserved_demand DESC
+LIMIT 10;
+
+-- 2b: top 20 LGAs by unserved demand (target places only)
+SELECT state,
+       lga,
+       COUNT(*) AS target_places,
+       SUM(population) AS people,
+       ROUND(SUM(demand)) AS unserved_demand,
+       ROUND(SUM(demand) / COUNT(*), 1) AS demand_per_place,
+       ROUND(AVG(opportunity_score_adj), 1) AS avg_score_adj
+FROM settlements
+WHERE is_target = 1
+GROUP BY state, lga
+ORDER BY unserved_demand DESC
+LIMIT 20;
