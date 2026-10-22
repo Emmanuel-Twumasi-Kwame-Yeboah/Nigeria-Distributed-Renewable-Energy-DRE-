@@ -91,39 +91,50 @@ def clean(df):
         #target places (rural AND no power)
     df["is_rural"] = (df["population"] < 5000).astype(int)
     df["is_target"] = ((df["is_rural"] == 1) & (df["power_status"] == "No power")).astype(int)
+
+        #rank demand from 0 to 1 (target places only)
+    target = df["is_target"] == 1
+    df["rank_demand"] = df.loc[target, "demand"].rank(pct=True)
+
+        #rank sunshine from 0 to 1 (target places only)
+    df["rank_solar"] = df.loc[target, "pv_value"].rank(pct=True)
+
+        #rank wealth from 0 to 1 (target places only); blank wealth gets a neutral 0.5
+    df["rank_wealth"] = df.loc[target, "mean_rwi"].rank(pct=True)
+    df.loc[target, "rank_wealth"] = df.loc[target, "rank_wealth"].fillna(0.5)
+
+    #rank distance from the power line from 0 to 1 (target places only)
+    df["rank_distance"] = df.loc[target, "dist_transmission_km"].rank(pct=True)
+
+        #extra users score (school or clinic, plus road access), target places only
+    has_facility = ((df["num_education_facilities"] > 0) | (df["num_health_facilities"] > 0)).astype(int)
+    df["rank_productive"] = (0.5 * has_facility + 0.5 * df["main_road_access"]).where(target)
+
+        #opportunity score out of 100 (target places only)
+    df["opportunity_score"] = (
+        0.30 * df["rank_demand"]
+        + 0.20 * df["rank_solar"]
+        + 0.20 * df["rank_wealth"]
+        + 0.15 * df["rank_distance"]
+        + 0.15 * df["rank_productive"]
+    ) * 100
+    df["opportunity_score"] = df["opportunity_score"].round(2)
+
+        #lower the score in risky areas (low = 1.0, medium = 0.9, high = 0.8)
+    risk_factor = df["security_risk"].map({"low": 1.0, "medium": 0.9, "high": 0.8})
+    df["opportunity_score_adj"] = (df["opportunity_score"] * risk_factor).round(2)
+
     return df
 
 
 # ---------- RUN ----------
 def main():
     df = clean(load())
-    print(df.shape)
-
-    print(df.loc[0, ["fatal25_p1", "fatal25_p2", "fatal25_p3", "fatal25_p4", "fatal25_total"]])
-
-    print(df["rwi_missing"].sum(), df["hub_missing"].sum())
-
-    print(df["pv_value"].isna().sum())
-
-    print(df["main_road_access"].value_counts())
-
-    print(df.loc[0, ["fatal50_p1", "fatal50_p2", "fatal50_p3", "fatal50_p4", "fatal50_total"]])
-
-    print(df["power_status"].value_counts())
-
-    print(df["place_type"].value_counts())
-
-    print(df["grid_band"].value_counts())
-
-    print(df["is_rural"].value_counts())
-
-    print(df["is_target"].value_counts())
-    print(df[df["is_target"] == 1]["place_type"].value_counts())
-
-def main():
-    df = clean(load())
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     df.to_csv(OUT_DIR / "settlements_clean.csv", index=False)
     print("Saved:", df.shape)
+    print(df[["opportunity_score", "opportunity_score_adj"]].describe())
+
+    
 if __name__ == "__main__":
     main()
